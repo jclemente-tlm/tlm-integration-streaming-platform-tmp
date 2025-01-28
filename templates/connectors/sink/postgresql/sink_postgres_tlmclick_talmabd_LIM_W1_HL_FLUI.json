@@ -1,0 +1,29 @@
+{
+    "name": "sink_postgres_tlmclick_talmabd_LIM_W1_HL_FLUI",
+    "config": {
+        "connector.class": "io.debezium.connector.jdbc.JdbcSinkConnector",
+        "connection.url": "jdbc:postgresql://{{DB_TLMCLICK_PG_HOST}}:{{DB_TLMCLICK_PG_PORT}}/{{DB_TLMCLICK_PG_DBNAME}}",
+        "connection.username": "{{DB_TLMCLICK_PG_USER}}",
+        "connection.password": "{{DB_TLMCLICK_PG_PASS}}",
+        "insert.mode": "upsert",
+        "delete.enabled": "true",
+        "primary.key.mode": "record_key",
+        "schema.evolution": "basic",
+        "primary.key.fields": "FLUI_INTERNAL_NUMBER",
+        "database.time_zone": "UTC",
+        "topics": "talmabd.LIM_W1_HL.FLUI",
+        "auto.create": "true",
+        "auto.evolve": "true",
+        "table.name.format": "${topic}",
+        "field.include.list": "FLUI_INTERNAL_NUMBER,FLUI_CUSTOMS_REFNO,FLUI_FFM_DATE,FLUI_CUSTOMER_NO,FLUI_FLIGHT_NO,FLUI_SCHEDULE_DATE,FLUI_LANDED_TIME,FLUI_LANDED_DATE,FLUI_SCHEDULE_TIME,FLUI_DEPARTURE_DATE,FLUI_EXPECTED_TIME,FLUI_EXPECTED_DATE,event_timestamp",
+        "transforms": "unwrap,formatTs,RenameField",
+        "transforms.unwrap.type": "io.debezium.transforms.ExtractNewRecordState",
+        "transforms.unwrap.drop.tombstones": "false",
+        "transforms.formatTs.type": "org.apache.kafka.connect.transforms.TimestampConverter$Value",
+        "transforms.formatTs.format": "yyyy-MM-dd HH:mm:ss.SSS",
+        "transforms.formatTs.target.type": "string",
+        "transforms.formatTs.field": "__source_ts_ms",
+        "transforms.RenameField.type": "org.apache.kafka.connect.transforms.ReplaceField$Value",
+        "transforms.RenameField.renames": "__source_ts_ms:event_timestamp"
+    }
+}

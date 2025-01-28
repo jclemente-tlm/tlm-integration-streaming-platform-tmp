@@ -1,0 +1,27 @@
+**/*.rpm
+**/*.jar
+**/*.zip
+**/*.tar.gz
+**/*.bin
+.idea/
+.DS_Store
+.vscode/
+
+# Ignorar todos los archivos .jar
+*.jar
+
+# Incluir .jar solo en la carpeta plugins y sus subcarpetas
+!plugins/**/*.jar
+
+# .pem keys
+**/*.pem
+
+# dotenv files
+.env
+**/*.env
+
+!**/*.template.env
+!**/default.env
+!**/common.env
+!**/deploy.env
+!**/ssh.env

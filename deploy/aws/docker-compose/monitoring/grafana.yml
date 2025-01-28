@@ -1,0 +1,32 @@
+services:
+  grafana:
+    image: grafana/grafana:${GRAFANA_VERSION}
+    container_name: grafana
+    restart: always
+    env_file:
+      - ./env/deploy.env
+    networks:
+      - integration-network
+    ports:
+      - "3000:3000"
+    environment:
+      PROMETHEUS_URL: http://prometheus:9090
+      GF_SECURITY_ADMIN_USER: ${GRAFANA_ADMIN_USER:-admin}
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD:-admin}
+      GF_INSTALL_PLUGINS: ${GRAFANA_PLUGINS:-grafana-clock-panel,grafana-simple-json-datasource}
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./config/provisioning/dashboards:/etc/grafana/provisioning/dashboards
+      - ./config/provisioning/datasources/prometheus.yml:/etc/grafana/provisioning/datasources/prometheus.yml
+
+# networks:
+#   integration-network:
+#     name: integration-network
+#     driver: bridge
+
+networks:
+  integration-network:
+    external: true
+
+volumes:
+  grafana_data:

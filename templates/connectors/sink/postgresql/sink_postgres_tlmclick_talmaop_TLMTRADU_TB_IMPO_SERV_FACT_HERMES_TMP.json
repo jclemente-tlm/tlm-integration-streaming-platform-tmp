@@ -1,0 +1,29 @@
+{
+    "name": "sink_postgres_tlmclick_talmaop_TLMTRADU_TB_IMPO_SERV_FACT_HERMES_TMP",
+    "config": {
+        "connector.class": "io.debezium.connector.jdbc.JdbcSinkConnector",
+        "connection.url": "jdbc:postgresql://{{DB_TLMCLICK_PG_HOST}}:{{DB_TLMCLICK_PG_PORT}}/{{DB_TLMCLICK_PG_DBNAME}}",
+        "connection.username": "{{DB_TLMCLICK_PG_USER}}",
+        "connection.password": "{{DB_TLMCLICK_PG_PASS}}",
+        "insert.mode": "upsert",
+        // "delete.enabled": "true",
+        "primary.key.mode": "record_value",
+        "schema.evolution": "basic",
+        "primary.key.fields": "CO_TURN,NU_VOLA,CO_CPTO,CO_MATERIAL_SAP,NUMERO_DOCUMENTO",
+        "database.time_zone": "UTC",
+        "topics": "talmaop.TLMTRADU.TB_IMPO_SERV_FACT_HERMES_TMP",
+        "auto.create": "true",
+        "auto.evolve": "true",
+        "table.name.format": "${topic}",
+        "field.include.list": "CO_TURN,NU_VOLA,CO_CPTO,CO_MATERIAL_SAP,NUMERO_DOCUMENTO,NU_MANI,NU_GUIA_HIJA,NU_GUIA_MADR,LAGI_PN,DE_CPTO,NU_KG_RECI,ID_GUIA,event_timestamp",
+        "transforms": "unwrap,formatTs,RenameField",
+        "transforms.unwrap.type": "io.debezium.transforms.ExtractNewRecordState",
+        "transforms.unwrap.drop.tombstones": "false",
+        "transforms.formatTs.type": "org.apache.kafka.connect.transforms.TimestampConverter$Value",
+        "transforms.formatTs.format": "yyyy-MM-dd HH:mm:ss.SSS",
+        "transforms.formatTs.target.type": "string",
+        "transforms.formatTs.field": "__source_ts_ms",
+        "transforms.RenameField.type": "org.apache.kafka.connect.transforms.ReplaceField$Value",
+        "transforms.RenameField.renames": "__source_ts_ms:event_timestamp"
+    }
+}

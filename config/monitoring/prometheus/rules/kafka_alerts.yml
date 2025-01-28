@@ -1,0 +1,20 @@
+groups:
+  - name: kafka_alerts
+    rules:
+      - alert: KafkaBrokerDown
+        expr: kafka_server_active_controller_count < 1
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Kafka broker down"
+          description: "Kafka broker has been down for more than 1 minute"
+
+      - alert: KafkaTopicUnderReplicated
+        expr: kafka_server_replicamanager_underreplicatedpartitions > 0
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Kafka topic under-replicated"
+          description: "Kafka topic has under-replicated partitions"

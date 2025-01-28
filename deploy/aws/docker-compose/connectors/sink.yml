@@ -1,0 +1,65 @@
+services:
+  sink-connect:
+    image: confluentinc/cp-kafka-connect:${KAFKA_CONNECT_VERSION}
+    container_name: sink-connect
+    restart: always
+    env_file:
+      # - ./env/common.env
+      - ./env/deploy.env
+    ports:
+      - "8083:8083"
+      - "9200:9200"
+    environment:
+      CONNECT_BOOTSTRAP_SERVERS: "${BROKER_1_IP}:29092,${BROKER_2_IP}:29092"
+      CONNECT_GROUP_ID: "sink-connect-group"
+      CONNECT_CONFIG_STORAGE_TOPIC: "_sink-connect-configs"
+      CONNECT_OFFSET_STORAGE_TOPIC: "_sink-connect-offsets"
+      CONNECT_STATUS_STORAGE_TOPIC: "_sink-connect-status"
+      CONNECT_REST_ADVERTISED_HOST_NAME: ${SINK_CONNECT_IP}
+      CONNECT_REST_PORT: 8083
+      CONNECT_CONFIG_STORAGE_REPLICATION_FACTOR: 2
+      CONNECT_OFFSET_STORAGE_REPLICATION_FACTOR: 2
+      CONNECT_STATUS_STORAGE_REPLICATION_FACTOR: 2
+      CONNECT_KEY_CONVERTER: "org.apache.kafka.connect.json.JsonConverter"
+      CONNECT_VALUE_CONVERTER: "org.apache.kafka.connect.json.JsonConverter"
+      # CONNECT_KEY_CONVERTER_SCHEMAS_ENABLE: "false"
+      # CONNECT_VALUE_CONVERTER_SCHEMAS_ENABLE: "false"
+      CONNECT_PLUGIN_PATH: "/usr/share/java,/usr/share/confluent-hub-components"
+      KAFKA_JMX_OPTS: "-javaagent:/usr/share/jmx_exporter/jmx_prometheus_javaagent-${JMX_AGENT_VERSION}.jar=9200:/usr/share/jmx_exporter/kafka-connect.yml"
+    volumes:
+      - sink_connect_data:/var/lib/kafka/data
+      - ./plugins/jmx-exporter:/usr/share/jmx_exporter/
+      - ./plugins/converters/TimestampConverter-1.2.5-FOX.jar:/usr/share/plugins/TimestampConverter-1.2.5-FOX.jar
+    networks:
+      - integration-network
+    command:
+      - bash
+      - -c
+      - |
+        echo "Installing Connector"
+        confluent-hub install --no-prompt debezium/debezium-connector-postgresql:2.5.4
+        confluent-hub install --no-prompt confluentinc/kafka-connect-jdbc:10.8.0
+        confluent-hub install --no-prompt confluentinc/connect-transforms:1.6.1
+        confluent-hub install --no-prompt confluentinc/kafka-connect-s3:10.5.17
+        # confluent-hub install --no-prompt jcustenborder/kafka-connect-transform-common:latest
+        #
+        # -----------
+        # Install Debezium Oracle connector and required libraries
+        # -- Download
+        curl "https://repo1.maven.org/maven2/io/debezium/debezium-connector-oracle/3.0.2.Final/debezium-connector-oracle-3.0.2.Final-plugin.tar.gz" | \
+          tar xvfz - --directory /usr/share/java/
+        curl https://repo1.maven.org/maven2/io/debezium/debezium-connector-jdbc/3.0.2.Final/debezium-connector-jdbc-3.0.2.Final-plugin.tar.gz | \
+          tar xvfz - --directory /usr/share/java/
+        cp /usr/share/plugins/TimestampConverter-1.2.5-FOX.jar /usr/share/java/debezium-connector-oracle/TimestampConverter-1.2.5-FOX.jar
+        echo "Launching Kafka Connect worker"
+        /etc/confluent/docker/run &
+        #
+        sleep infinity
+
+networks:
+  integration-network:
+    name: integration-network
+    driver: bridge
+
+volumes:
+  sink_connect_data:

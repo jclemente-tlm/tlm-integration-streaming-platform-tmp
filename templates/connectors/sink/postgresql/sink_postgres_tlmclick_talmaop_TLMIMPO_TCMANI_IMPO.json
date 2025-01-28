@@ -1,0 +1,29 @@
+{
+    "name": "sink_postgres_tlmclick_talmaop_TLMIMPO_TCMANI_IMPO",
+    "config": {
+        "connector.class": "io.debezium.connector.jdbc.JdbcSinkConnector",
+        "connection.url": "jdbc:postgresql://{{DB_TLMCLICK_PG_HOST}}:{{DB_TLMCLICK_PG_PORT}}/{{DB_TLMCLICK_PG_DBNAME}}",
+        "connection.username": "{{DB_TLMCLICK_PG_USER}}",
+        "connection.password": "{{DB_TLMCLICK_PG_PASS}}",
+        "insert.mode": "upsert",
+        "delete.enabled": "true",
+        "primary.key.mode": "record_key",
+        "schema.evolution": "basic",
+        "primary.key.fields": "CO_EMPR,CO_TERM,NU_MANI",
+        "database.time_zone": "UTC",
+        "topics": "talmaop.TLMIMPO.TCMANI_IMPO",
+        "auto.create": "true",
+        "auto.evolve": "true",
+        "table.name.format": "${topic}",
+        "field.include.list": "CO_EMPR,CO_TERM,NU_MANI,FE_LLEG_ALMA,event_timestamp",
+        "transforms": "unwrap,formatTs,RenameField",
+        "transforms.unwrap.type": "io.debezium.transforms.ExtractNewRecordState",
+        "transforms.unwrap.drop.tombstones": "false",
+        "transforms.formatTs.type": "org.apache.kafka.connect.transforms.TimestampConverter$Value",
+        "transforms.formatTs.format": "yyyy-MM-dd HH:mm:ss.SSS",
+        "transforms.formatTs.target.type": "string",
+        "transforms.formatTs.field": "__source_ts_ms",
+        "transforms.RenameField.type": "org.apache.kafka.connect.transforms.ReplaceField$Value",
+        "transforms.RenameField.renames": "__source_ts_ms:event_timestamp"
+    }
+}

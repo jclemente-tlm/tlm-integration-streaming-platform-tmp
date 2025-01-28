@@ -1,0 +1,29 @@
+{
+    "name": "sink_postgres_tlmclick_talmabd_LIM_W1_HL_LAGI",
+    "config": {
+        "connector.class": "io.debezium.connector.jdbc.JdbcSinkConnector",
+        "connection.url": "jdbc:postgresql://{{DB_TLMCLICK_PG_HOST}}:{{DB_TLMCLICK_PG_PORT}}/{{DB_TLMCLICK_PG_DBNAME}}",
+        "connection.username": "{{DB_TLMCLICK_PG_USER}}",
+        "connection.password": "{{DB_TLMCLICK_PG_PASS}}",
+        "insert.mode": "upsert",
+        "delete.enabled": "true",
+        "primary.key.mode": "record_key",
+        "schema.evolution": "basic",
+        "primary.key.fields": "LAGI_IDENT_NO,LAGI_SHIPMENT_DESC_CODE",
+        "database.time_zone": "UTC",
+        "topics": "talmabd.LIM_W1_HL.LAGI",
+        "auto.create": "true",
+        "auto.evolve": "true",
+        "table.name.format": "${topic}",
+        "field.include.list": "LAGI_IDENT_NO,LAGI_SHIPMENT_DESC_CODE,LAGI_CUSTOMER_NO_AIRLINE,LAGI_FLIGHT_NO_IN,LAGI_FLIGHT_DATE_IN,LAGI_WEIGHT_RECEIVED,LAGI_DELETED,LAGI_LOCAL_TRANSFER,LAGI_CURRENT_AGENT,LAGI_CONSIGNEE_NUMBER,LAGI_GOODS_CONTENT,LAGI_QUANTITY_RECEIVED,LAGI_FLIGHT_ARRIVE_DATE,LAGI_MAWB_PREFIX,LAGI_MAWB_NO,LAGI_HAWB,LAGI_PN,LAGI_CUSTOM_REF_NO,event_timestamp",
+        "transforms": "unwrap,formatTs,RenameField",
+        "transforms.unwrap.type": "io.debezium.transforms.ExtractNewRecordState",
+        "transforms.unwrap.drop.tombstones": "false",
+        "transforms.formatTs.type": "org.apache.kafka.connect.transforms.TimestampConverter$Value",
+        "transforms.formatTs.format": "yyyy-MM-dd HH:mm:ss.SSS",
+        "transforms.formatTs.target.type": "string",
+        "transforms.formatTs.field": "__source_ts_ms",
+        "transforms.RenameField.type": "org.apache.kafka.connect.transforms.ReplaceField$Value",
+        "transforms.RenameField.renames": "__source_ts_ms:event_timestamp"
+    }
+}

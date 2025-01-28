@@ -1,0 +1,31 @@
+services:
+  kafka-ui:
+    image: provectuslabs/kafka-ui:master
+    container_name: kafka-ui
+    env_file:
+      # - ./env/common.env
+      - ./env/deploy.env
+    restart: always
+    ports:
+      - "8080:8080"
+    networks:
+      - integration-network
+    environment:
+      KAFKA_CLUSTERS_0_NAME: "kafka-cluster"
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: "${BROKER_1_IP}:29092,${BROKER_2_IP}:29092"
+      KAFKA_CLUSTERS_0_CONNECT_URL: "http://${MONITORING_IP}:8083"
+      KAFKA_CLUSTERS_0_KAFKACONNECT_0_NAME: source_connect
+      KAFKA_CLUSTERS_0_KAFKACONNECT_0_ADDRESS: http://${SOURCE_CONNECT_IP}:8083
+      KAFKA_CLUSTERS_0_KAFKACONNECT_1_NAME: sink_connect
+      KAFKA_CLUSTERS_0_KAFKACONNECT_1_ADDRESS: http://${SINK_CONNECT_IP}:8083
+
+    volumes:
+      - kafka_ui_data:/var/lib/kafka/data
+
+networks:
+  integration-network:
+    name: integration-network
+    driver: bridge
+
+volumes:
+  kafka_ui_data:

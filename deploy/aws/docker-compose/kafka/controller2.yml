@@ -1,0 +1,38 @@
+services:
+  controller-2:
+    image: confluentinc/cp-kafka:${KAFKA_VERSION}
+    container_name: controller-2
+    restart: always
+    env_file:
+      # - ./env/common.env
+      - ./env/deploy.env
+    networks:
+      - integration-network
+    ports:
+      - 9093:9093
+      - 19093:19093
+      - 39092:39092
+      - 9200:9200
+    tty: true
+    environment:
+      CLUSTER_ID: ${KAFKA_CLUSTER_ID}
+      KAFKA_PROCESS_ROLES: "controller"
+      KAFKA_NODE_ID: 2
+      KAFKA_CONTROLLER_QUORUM_VOTERS: "1@${CONTROLLER_1_IP}:39092,2@controller-2:39092"
+      KAFKA_LISTENERS: CONTROLLER://controller-2:19093,CONTROLLER_DOCKER_HOST://controller-2:9093,CONTROLLER_EXTERNAL://controller-2:39092
+      KAFKA_CONTROLLER_LISTENERS: CONTROLLER://controller-2:19093,CONTROLLER_DOCKER_HOST://localhost:9093,CONTROLLER_EXTERNAL://controller-2:39092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,CONTROLLER_DOCKER_HOST:PLAINTEXT,CONTROLLER_EXTERNAL:PLAINTEXT
+      KAFKA_CONTROLLER_LISTENER_NAMES: "CONTROLLER,CONTROLLER_DOCKER_HOST,CONTROLLER_EXTERNAL"
+      KAFKA_LOG_DIRS: "/tmp/kraft-combined-logs"
+      KAFKA_OPTS: -javaagent:/usr/share/jmx_exporter/jmx_prometheus_javaagent-${JMX_AGENT_VERSION}.jar=9200:/usr/share/jmx_exporter/kafka-controller.yml
+    volumes:
+      - controller_2_data:/var/lib/kafka/data
+      - ./plugins/jmx-exporter:/usr/share/jmx_exporter/
+
+networks:
+  integration-network:
+    name: integration-network
+    driver: bridge
+
+volumes:
+  controller_2_data:

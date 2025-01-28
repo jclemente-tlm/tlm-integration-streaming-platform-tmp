@@ -1,0 +1,320 @@
+services:
+  controller-1:
+    image: confluentinc/cp-kafka:${KAFKA_VERSION}
+    # hostname: controller-1
+    container_name: controller-1
+    networks:
+      - integration-network
+    ports:
+      - 9093:9093
+      - 19093:19093
+      - 29093:29093
+      - 9200:9200
+    tty: true
+    environment:
+      CLUSTER_ID: ${KAFKA_CLUSTER_ID}
+      KAFKA_PROCESS_ROLES: "controller"
+      KAFKA_NODE_ID: 1
+      KAFKA_CONTROLLER_QUORUM_VOTERS: "1@controller-1:9093,2@controller-2:9094"
+      KAFKA_LISTENERS: CONTROLLER://controller-1:19093,CONTROLLER_DOCKER_HOST://controller-1:9093,CONTROLLER_EXTERNAL://controller-1:29093
+      KAFKA_CONTROLLER_LISTENERS: CONTROLLER://controller-1:19093,CONTROLLER_DOCKER_HOST://localhost:9093,CONTROLLER_EXTERNAL://external-controller-1:29093
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,CONTROLLER_DOCKER_HOST:PLAINTEXT,CONTROLLER_EXTERNAL:PLAINTEXT
+      KAFKA_CONTROLLER_LISTENER_NAMES: "CONTROLLER,CONTROLLER_DOCKER_HOST,CONTROLLER_EXTERNAL"
+      KAFKA_LOG_DIRS: "/tmp/kraft-combined-logs"
+      KAFKA_OPTS: -javaagent:/usr/share/jmx_exporter/jmx_prometheus_javaagent-${JMX_AGENT_VERSION}.jar=9200:/usr/share/jmx_exporter/kafka-controller.yml
+    volumes:
+      - ./plugins/jmx-exporter:/usr/share/jmx_exporter/
+
+  controller-2:
+    image: confluentinc/cp-kafka:${KAFKA_VERSION}
+    # hostname: controller-2
+    container_name: controller-2
+    networks:
+      - integration-network
+    ports:
+      - 9094:9094
+      - 19094:19094
+      - 29094:29094
+      - 9201:9200
+    # tty: true
+    environment:
+      JMX_AGENT_VERSION: "${JMX_AGENT_VERSION}"
+      KAFKA_VERSION: "${KAFKA_VERSION}"
+      CLUSTER_ID: ${KAFKA_CLUSTER_ID}
+      KAFKA_PROCESS_ROLES: "controller"
+      KAFKA_NODE_ID: 2
+      KAFKA_CONTROLLER_QUORUM_VOTERS: "1@controller-1:9093,2@controller-2:9094"
+      KAFKA_LISTENERS: CONTROLLER://controller-2:19094,CONTROLLER_DOCKER_HOST://controller-2:9094,CONTROLLER_EXTERNAL://controller-2:29094
+      KAFKA_CONTROLLER_LISTENERS: CONTROLLER://controller-2:19094,CONTROLLER_DOCKER_HOST://localhost:9094,CONTROLLER_EXTERNAL://external-controller-2:29094
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,CONTROLLER_DOCKER_HOST:PLAINTEXT,CONTROLLER_EXTERNAL:PLAINTEXT
+      KAFKA_CONTROLLER_LISTENER_NAMES: "CONTROLLER,CONTROLLER_DOCKER_HOST,CONTROLLER_EXTERNAL"
+      KAFKA_LOG_DIRS: "/tmp/kraft-combined-logs"
+      KAFKA_OPTS: -javaagent:/usr/share/jmx_exporter/jmx_prometheus_javaagent-${JMX_AGENT_VERSION}.jar=9200:/usr/share/jmx_exporter/kafka-controller.yml
+    volumes:
+      - ./plugins/jmx-exporter:/usr/share/jmx_exporter/
+
+  broker-1:
+    image: confluentinc/cp-kafka:${KAFKA_VERSION}
+    # hostname: broker-1
+    container_name: broker-1
+    networks:
+      - integration-network
+    ports:
+      - 9095:9095
+      - 19095:19095
+      - 29095:29095
+      - 9202:9200
+    # tty: true
+    environment:
+      CLUSTER_ID: ${KAFKA_CLUSTER_ID}
+      KAFKA_NODE_ID: 3
+      KAFKA_PROCESS_ROLES: "broker"
+      KAFKA_CONTROLLER_QUORUM_VOTERS: "1@controller-1:9093,2@controller-2:9094"
+      KAFKA_LISTENERS: INTERNAL://broker-1:19095,DOCKER_HOST://broker-1:9095,EXTERNAL://broker-1:29095
+      KAFKA_ADVERTISED_LISTENERS: INTERNAL://broker-1:19095,DOCKER_HOST://localhost:9095,EXTERNAL://external-broker-1:29095
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INTERNAL:PLAINTEXT,DOCKER_HOST:PLAINTEXT,EXTERNAL:PLAINTEXT,CONTROLLER:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: INTERNAL
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 2
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 2
+      KAFKA_LOG_DIRS: "/tmp/kraft-combined-logs"
+
+      KAFKA_OPTS: -javaagent:/usr/share/jmx_exporter/jmx_prometheus_javaagent-${JMX_AGENT_VERSION}.jar=9200:/usr/share/jmx_exporter/kafka-broker.yml
+    volumes:
+      - ./plugins/jmx-exporter:/usr/share/jmx_exporter/
+    depends_on:
+      - controller-1
+      - controller-2
+
+  broker-2:
+    image: confluentinc/cp-kafka:${KAFKA_VERSION}
+    # hostname: broker-2
+    container_name: broker-2
+    networks:
+      - integration-network
+    ports:
+      - 9096:9096
+      - 19096:19096
+      - 29096:29096
+      - 9203:9200
+    # tty: true
+    environment:
+      CLUSTER_ID: ${KAFKA_CLUSTER_ID}
+      KAFKA_NODE_ID: 4
+      KAFKA_PROCESS_ROLES: "broker"
+      KAFKA_CONTROLLER_QUORUM_VOTERS: "1@controller-1:9093,2@controller-2:9094"
+      KAFKA_LISTENERS: INTERNAL://broker-2:19096,DOCKER_HOST://broker-2:9096,EXTERNAL://broker-2:29096
+      KAFKA_ADVERTISED_LISTENERS: INTERNAL://broker-2:19096,DOCKER_HOST://localhost:9096,EXTERNAL://external-broker-2:29096
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INTERNAL:PLAINTEXT,DOCKER_HOST:PLAINTEXT,EXTERNAL:PLAINTEXT,CONTROLLER:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: INTERNAL
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 2
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 2
+      KAFKA_LOG_DIRS: "/tmp/kraft-combined-logs"
+
+      KAFKA_OPTS: -javaagent:/usr/share/jmx_exporter/jmx_prometheus_javaagent-${JMX_AGENT_VERSION}.jar=9200:/usr/share/jmx_exporter/kafka-broker.yml
+    volumes:
+      - ./plugins/jmx-exporter:/usr/share/jmx_exporter/
+    depends_on:
+      - controller-1
+      - controller-2
+
+  # Kafka Connect (Debezium y Sink Connectors)
+  connect:
+    image: confluentinc/cp-kafka-connect:${KAFKA_CONNECT_VERSION}
+    container_name: connect
+    # hostname: connect
+    ports:
+      - "8083:8083"
+      - "9204:9200"
+    environment:
+      CONNECT_BOOTSTRAP_SERVERS: "broker-1:19095,broker-2:19096"
+      CONNECT_GROUP_ID: "source-connect-group"
+      CONNECT_CONFIG_STORAGE_TOPIC: "_connect-configs"
+      CONNECT_OFFSET_STORAGE_TOPIC: "_connect-offsets"
+      CONNECT_STATUS_STORAGE_TOPIC: "_connect-status"
+      CONNECT_REST_ADVERTISED_HOST_NAME: connect
+      CONNECT_REST_PORT: 8083
+      CONNECT_CONFIG_STORAGE_REPLICATION_FACTOR: 2
+      CONNECT_OFFSET_STORAGE_REPLICATION_FACTOR: 2
+      CONNECT_STATUS_STORAGE_REPLICATION_FACTOR: 2
+      CONNECT_KEY_CONVERTER: "org.apache.kafka.connect.json.JsonConverter"
+      CONNECT_VALUE_CONVERTER: "org.apache.kafka.connect.json.JsonConverter"
+      # CONNECT_KEY_CONVERTER_SCHEMAS_ENABLE: "false"
+      # CONNECT_VALUE_CONVERTER_SCHEMAS_ENABLE: "false"
+
+      CONNECT_PLUGIN_PATH: "/usr/share/java,/usr/share/confluent-hub-components"
+      KAFKA_JMX_OPTS: -javaagent:/usr/share/jmx_exporter/jmx_prometheus_javaagent-${JMX_AGENT_VERSION}.jar=9200:/usr/share/jmx_exporter/kafka-connect.yml
+    volumes:
+      - ./plugins/jmx-exporter:/usr/share/jmx_exporter/
+      # - source_connect_data:/kafka/connect
+      - ./plugins/converters/TimestampConverter-1.2.5-FOX.jar:/usr/share/plugins/TimestampConverter-1.2.5-FOX.jar
+    depends_on:
+      - broker-1
+      - broker-2
+    networks:
+      - integration-network
+    command:
+      - bash
+      - -c
+      - |
+        echo "===> Installing Confluent Hub plugins"
+        confluent-hub install --no-prompt debezium/debezium-connector-postgresql:2.5.4
+        confluent-hub install --no-prompt confluentinc/kafka-connect-jdbc:10.8.0
+        confluent-hub install --no-prompt confluentinc/connect-transforms:1.6.1
+        confluent-hub install --no-prompt confluentinc/kafka-connect-s3:10.5.17
+        #
+        # -----------
+        # Install Debezium Oracle connector and required libraries
+        # -----------
+        echo "===> Installing Debezium connectors"
+        curl https://repo1.maven.org/maven2/io/debezium/debezium-connector-oracle/3.0.2.Final/debezium-connector-oracle-3.0.2.Final-plugin.tar.gz | \
+          tar xvfz - --directory /usr/share/java/
+        curl https://repo1.maven.org/maven2/io/debezium/debezium-connector-jdbc/3.0.2.Final/debezium-connector-jdbc-3.0.2.Final-plugin.tar.gz | \
+          tar xvfz - --directory /usr/share/java/
+        cp /usr/share/plugins/TimestampConverter-1.2.5-FOX.jar /usr/share/java/debezium-connector-oracle/TimestampConverter-1.2.5-FOX.jar
+        echo "Launching Kafka Connect worker"
+        /etc/confluent/docker/run &
+        #
+        sleep infinity
+
+  kafka-ui:
+    image: provectuslabs/kafka-ui:master
+    container_name: kafka-ui
+    ports:
+      - "9080:8080"
+    networks:
+      - integration-network
+    environment:
+      KAFKA_CLUSTERS_0_NAME: "kafka-cluster"
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: "broker-1:19095,broker-2:19096"
+      KAFKA_CLUSTERS_0_CONNECT_URL: "http://connect:8083"
+      KAFKA_CLUSTERS_0_KAFKACONNECT_0_NAME: connect
+      KAFKA_CLUSTERS_0_KAFKACONNECT_0_ADDRESS: http://connect:8083
+      # KAFKA_CLUSTERS_0_KAFKACONNECT_1_NAME: sink_connect
+      # KAFKA_CLUSTERS_0_KAFKACONNECT_1_ADDRESS: http://sink-connect:8093
+
+    # volumes:
+    #   - ./secrets:/etc/kafka/secrets
+
+  prometheus:
+    image: prom/prometheus:${PROMETHEUS_VERSION}
+    container_name: prometheus
+    restart: always
+    networks:
+      - integration-network
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    ports:
+      - "9090:9090"
+    volumes:
+      # - prometheus_data:/prometheus
+      - ./config/monitoring/prometheus/prometheus.local.template.yml:/etc/prometheus/prometheus.local.template.yml
+    environment:
+      CONTROLLER_1_IP: controller-1
+      CONTROLLER_2_IP: controller-2
+      BROKER_1_IP: broker-1
+      BROKER_2_IP: broker-2
+      SOURCE_CONNECT_IP: connect
+      SINK_CONNECT_IP: sink-connect
+    entrypoint:
+      - /bin/sh
+      - -c
+      - |
+        echo "$(cat /etc/prometheus/prometheus.local.template.yml)" | \
+        tr '$' '@' | \
+        sed "s/@{CONTROLLER_1_IP}/$CONTROLLER_1_IP/g" | \
+        sed "s/@{CONTROLLER_2_IP}/$CONTROLLER_2_IP/g" | \
+        sed "s/@{BROKER_1_IP}/$BROKER_1_IP/g" | \
+        sed "s/@{BROKER_2_IP}/$BROKER_2_IP/g" | \
+        sed "s/@{SOURCE_CONNECT_IP}/$SOURCE_CONNECT_IP/g" | \
+        sed "s/@{SINK_CONNECT_IP}/$SINK_CONNECT_IP/g" > /etc/prometheus/prometheus.yml && \
+        /bin/prometheus \
+          --config.file=/etc/prometheus/prometheus.yml \
+          --storage.tsdb.path=/prometheus \
+          --web.console.libraries=/usr/share/prometheus/console_libraries \
+          --web.console.templates=/usr/share/prometheus/consoles
+
+  grafana:
+    image: grafana/grafana:${GRAFANA_VERSION}
+    container_name: grafana
+    restart: always
+    networks:
+      - integration-network
+    ports:
+      - "3000:3000"
+    environment:
+      PROMETHEUS_URL: http://prometheus:9090
+      GF_SECURITY_ADMIN_USER: ${GRAFANA_ADMIN_USER:-admin}
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD:-admin}
+      GF_INSTALL_PLUGINS: ${GRAFANA_PLUGINS:-grafana-clock-panel,grafana-simple-json-datasource}
+    volumes:
+      - ./config/monitoring/grafana/provisioning/dashboards:/etc/grafana/provisioning/dashboards
+      - ./config/monitoring/grafana/provisioning/datasources/prometheus.yml:/etc/grafana/provisioning/datasources/prometheus.yml
+
+  alertmanager:
+    image: prom/alertmanager:v0.26.0
+    container_name: alertmanager
+    ports:
+      - "49093:9093"
+    networks:
+      - integration-network
+
+  oracle:
+    image: doctorkirk/oracle-19c:19.3
+
+    container_name: oracle
+    environment:
+      - ORACLE_SID=orcl
+      - ORACLE_PWD=Pass1234
+    volumes:
+      - oracle_data:/opt/oracle/oradata
+      - ./resources/oracle-setup-scripts:/opt/oracle/scripts/setup
+    ports:
+      - "1521:1521"
+    networks:
+      - integration-network
+
+  postgres:
+    image: postgres:latest
+
+    container_name: postgress
+    environment:
+      POSTGRES_DB: postgres
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: Pass1234
+      PGDATA: /var/lib/postgresql/data/pgdata
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    networks:
+      - integration-network
+
+  # kafkacat:
+  #   container_name: kafkacat
+  #   image: confluentinc/cp-kafkacat
+  #   networks:
+  #     - integration-network
+  #   command: sleep infinity
+
+networks:
+  integration-network:
+    driver: bridge
+
+volumes:
+  # controller_1_data:
+  # controller_2_data:
+  # broker_1_data:
+  # broker_2_data:
+  source_connect_data:
+  sink_connect_data:
+  oracle_data:
+  postgres_data:
+  prometheus_data:

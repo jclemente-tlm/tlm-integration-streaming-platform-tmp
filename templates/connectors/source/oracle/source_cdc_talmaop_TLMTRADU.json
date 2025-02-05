@@ -13,7 +13,9 @@
         "snapshot.mode": "no_data",
         "schema.history.internal.kafka.topic": "schema-changes.talmaop_TLMTRADU",
         "schema.history.internal.kafka.bootstrap.servers": "{{BROKER_1_IP}}:29092,{{BROKER_2_IP}}:29092",
-        "schema.history.internal.store.only.captured.databases.ddl": true,
+        "schema.history.internal.store.only.captured.tables.ddl": true,
+        "schema.history.internal.store.only.captured.databases.ddl": true, 
+        "log.mining.archive.log.only.mode": false,
         "schema.include.list": "TLMTRADU",
         "table.include.list": "TLMTRADU.ADU_TBGUIA_INMO,TLMTRADU.ADU_LAGI_SIOP_RESUMEN,TLMTRADU.ADU_TBGUIA_SERV,TLMTRADU.TB_IMPO_SERV_FACT_HERMES_TMP",
         "time.precision.mode": "connect",
@@ -31,6 +33,10 @@
         "transforms.unwrap.type": "io.debezium.transforms.ExtractNewRecordState",
         "transforms.unwrap.drop.tombstones": "false",
         "transforms.unwrap.delete.handling.mode": "none",
-        "transforms.unwrap.add.fields": "op,source.ts_ms,source.ts_us"
+        "transforms.unwrap.add.fields": "op,source.ts_ms,source.ts_us",
+        "log.mining.batch.size.max": 5000,
+        "log.mining.session.max.ms": 600000,
+        "log.mining.restart.connection": true,
+        "heartbeat.interval.ms": 10000
     }
 }

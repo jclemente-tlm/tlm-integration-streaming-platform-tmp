@@ -15,7 +15,7 @@
         "schema.history.internal.kafka.bootstrap.servers": "{{BROKER_1_IP}}:29092,{{BROKER_2_IP}}:29092",
         "schema.history.internal.store.only.captured.tables.ddl": true,
         "schema.history.internal.store.only.captured.databases.ddl": true, 
-        "log.mining.archive.log.only.mode": true,
+        "log.mining.archive.log.only.mode": false,
         "database.include.list": "talmaop",
         "schema.include.list": "TLMTRADU",
         "table.include.list": "TLMTRADU.ADU_LAGI_SIOP_RESUMEN",
@@ -40,6 +40,10 @@
         "transforms.addKey.predicate": "matchesTopic",
         "predicates": "matchesTopic",
         "predicates.matchesTopic.type": "org.apache.kafka.connect.transforms.predicates.TopicNameMatches",
-        "predicates.matchesTopic.pattern": "talmabd\\.TLMTRADU\\.ADU_LAGI_SIOP_RESUMEN"
+        "predicates.matchesTopic.pattern": "talmabd\\.TLMTRADU\\.ADU_LAGI_SIOP_RESUMEN",
+        "log.mining.batch.size.max": 5000,
+        "log.mining.session.max.ms": 600000,
+        "log.mining.restart.connection": true,
+        "heartbeat.interval.ms": 10000
     }
 }

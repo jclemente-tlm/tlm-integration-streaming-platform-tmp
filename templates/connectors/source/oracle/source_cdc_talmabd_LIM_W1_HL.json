@@ -15,7 +15,7 @@
         "schema.history.internal.kafka.bootstrap.servers": "{{BROKER_1_IP}}:29092,{{BROKER_2_IP}}:29092",
         "schema.history.internal.store.only.captured.tables.ddl": true,
         "schema.history.internal.store.only.captured.databases.ddl": true, 
-        "log.mining.archive.log.only.mode": true,
+        "log.mining.archive.log.only.mode": false,
         "database.include.list": "talmabd",
         "schema.include.list": "LIM_W1_HL",
         "table.include.list": "LIM_W1_HL.KUND,LIM_W1_HL.LAGI,LIM_W1_HL.TRANSLATED_COMBO,LIM_W1_HL.IRUN_INVOICE_RUN,LIM_W1_HL.VEHICLES_REGISTRATION,LIM_W1_HL.IOBD_INVOICE_OBJECT_DTL,LIM_W1_HL.IADR_INVOICE_ADDRESSES,LIM_W1_HL.INVH_INVOICE_HEADER,LIM_W1_HL.VHLD_VEHICLEDETAIL,LIM_W1_HL.INVL_INVOICE_LINES,LIM_W1_HL.DRIV_DRIVER_DETAILS,LIM_W1_HL.INVP_INVOICE_PAYMENTS,LIM_W1_HL.WHSE_WAREHOUSE",        
@@ -33,6 +33,10 @@
         "transforms": "unwrap",
         "transforms.unwrap.type": "io.debezium.transforms.ExtractNewRecordState",
         "transforms.unwrap.delete.tombstone.handling.mode": "rewrite-with-tombstone",
-        "transforms.unwrap.add.fields": "op,source.ts_ms,source.ts_us"
+        "transforms.unwrap.add.fields": "op,source.ts_ms,source.ts_us",
+        "log.mining.batch.size.max": 5000,
+        "log.mining.session.max.ms": 600000,
+        "log.mining.restart.connection": true,
+        "heartbeat.interval.ms": 10000
     }
 }

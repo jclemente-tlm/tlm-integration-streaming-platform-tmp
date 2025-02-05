@@ -15,12 +15,12 @@
         "schema.history.internal.kafka.bootstrap.servers": "{{BROKER_1_IP}}:29092,{{BROKER_2_IP}}:29092",
         "schema.history.internal.store.only.captured.tables.ddl": true,
         "schema.history.internal.store.only.captured.databases.ddl": true, 
-        "log.mining.archive.log.only.mode": true,
+        "log.mining.archive.log.only.mode": false,
         "database.include.list": "talmaop",
         "schema.include.list": "TLMIMPO",
         "table.include.list": "TLMIMPO.VENTAS_SAP",
         "time.precision.mode": "connect",
-        "decimal.handling.mode" : "precise",
+        "decimal.handling.mode": "precise",
         "binary.handling.mode": "hex",
         "converters": "dateToString,numberToLong,numberToFloat",
         "dateToString.type": "oryanmoshe.kafka.connect.util.OracleDateToStringConverter",
@@ -37,6 +37,10 @@
         "transforms": "unwrap",
         "transforms.unwrap.type": "io.debezium.transforms.ExtractNewRecordState",
         "transforms.unwrap.delete.tombstone.handling.mode": "rewrite-with-tombstone",
-        "transforms.unwrap.add.fields": "op,source.ts_ms,source.ts_us"
+        "transforms.unwrap.add.fields": "op,source.ts_ms,source.ts_us",
+        "log.mining.batch.size.max": 5000,
+        "log.mining.session.max.ms": 600000,
+        "log.mining.restart.connection": true,
+        "heartbeat.interval.ms": 10000
     }
 }

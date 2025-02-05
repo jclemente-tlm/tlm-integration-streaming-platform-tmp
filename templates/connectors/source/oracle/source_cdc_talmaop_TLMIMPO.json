@@ -15,7 +15,7 @@
         "schema.history.internal.kafka.bootstrap.servers": "{{BROKER_1_IP}}:29092,{{BROKER_2_IP}}:29092",
         "schema.history.internal.store.only.captured.tables.ddl": true,
         "schema.history.internal.store.only.captured.databases.ddl": true, 
-        "log.mining.archive.log.only.mode": true,
+        "log.mining.archive.log.only.mode": false,
         "database.include.list": "talmaop",
         "schema.include.list": "TLMIMPO",
         "table.include.list": "TLMIMPO.TCVOLA,TLMIMPO.TDMANI_IMPO,TLMIMPO.TCMANI_IMPO,TLMIMPO.TB_INFO_REP_KG_RECIBIDOS_PROC,TLMIMPO.TB_RESU_HER_ADD_INFO,TLMIMPO.TTTERM_ALMA_DATAMART,TLMIMPO.TCSERV_AUTO,TLMIMPO.TCCALC_CONC,TLMIMPO.TTCONC,TLMIMPO.TTCONC_OPERUSUA,TLMIMPO.TDMANI_ENVI",
@@ -33,6 +33,10 @@
         "transforms": "unwrap",
         "transforms.unwrap.type": "io.debezium.transforms.ExtractNewRecordState",
         "transforms.unwrap.delete.tombstone.handling.mode": "rewrite-with-tombstone",
-        "transforms.unwrap.add.fields": "op,source.ts_ms,source.ts_us"
+        "transforms.unwrap.add.fields": "op,source.ts_ms,source.ts_us",
+        "log.mining.batch.size.max": 5000,
+        "log.mining.session.max.ms": 600000,
+        "log.mining.restart.connection": true,
+        "heartbeat.interval.ms": 10000
     }
 }

@@ -15,7 +15,7 @@
         "schema.history.internal.kafka.bootstrap.servers": "{{BROKER_1_IP}}:29092,{{BROKER_2_IP}}:29092",
         "schema.history.internal.store.only.captured.tables.ddl": true,
         "schema.history.internal.store.only.captured.databases.ddl": true, 
-        "log.mining.archive.log.only.mode": true,
+        "log.mining.archive.log.only.mode": false,
         "database.include.list": "talmabd",
         "schema.include.list": "PE_SHARE_HL",
         "table.include.list": "PE_SHARE_HL.MITA,PE_SHARE_HL.IQHD_QUERY_HEADER,PE_SHARE_HL.ACRD_ACCOUNT_REVENUE_DETAIL,PE_SHARE_HL.ACRP_ACCOUNT_REVENUE_PARTITION,PE_SHARE_HL.TACC_TARIFF_CHARGES_CODES,PE_SHARE_HL.TRANSLATION,PE_SHARE_HL.COMBOVALUES",
@@ -33,6 +33,10 @@
         "transforms": "unwrap",
         "transforms.unwrap.type": "io.debezium.transforms.ExtractNewRecordState",
         "transforms.unwrap.delete.tombstone.handling.mode": "rewrite-with-tombstone",
-        "transforms.unwrap.add.fields": "op,source.ts_ms,source.ts_us"
+        "transforms.unwrap.add.fields": "op,source.ts_ms,source.ts_us",
+        "log.mining.batch.size.max": 5000,
+        "log.mining.session.max.ms": 600000,
+        "log.mining.restart.connection": true,
+        "heartbeat.interval.ms": 10000
     }
 }
